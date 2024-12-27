@@ -141,7 +141,7 @@ func NewMapMessage(ignoreKeys ...string) MapMessage {
 	return msg
 }
 
-func (m *MapMessage) MarshalJSON() ([]byte, error) {
+func (m MapMessage) MarshalJSON() ([]byte, error) {
 	return json.Marshal(m.values)
 }
 
