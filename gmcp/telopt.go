@@ -128,12 +128,12 @@ func (g *GMCP) AddPackages(pkgs ...Package) error {
 			// Set support
 			msg := CoreSupportsSetMessage{}
 			msg.Value = g.packageSupports(g.packages)
-			err = g.SendMessage(msg)
+			err = g.sendMessage(msg)
 		} else {
 			// Add support
 			msg := CoreSupportsAddMessage{}
 			msg.Value = g.packageSupports(addPackageSet)
-			err = g.SendMessage(msg)
+			err = g.sendMessage(msg)
 		}
 	}
 
@@ -194,7 +194,7 @@ func (g *GMCP) RemovePackage(pkgs ...Package) error {
 		// Update support
 		msg := CoreSupportsRemoveMessage{}
 		msg.Value = g.packageSupports(pkgRemoveSet)
-		err = g.SendMessage(msg)
+		err = g.sendMessage(msg)
 	}
 
 	return err
@@ -229,6 +229,13 @@ func (g *GMCP) writeMessage(id string, rawJson []byte) error {
 }
 
 func (g *GMCP) SendMessage(message Message) error {
+	g.parseLock.Lock()
+	defer g.parseLock.Unlock()
+
+	return g.sendMessage(message)
+}
+
+func (g *GMCP) sendMessage(message Message) error {
 	if g.LocalState() != telnet.TelOptActive && g.RemoteState() != telnet.TelOptActive {
 		return nil
 	}
@@ -288,11 +295,16 @@ func (g *GMCP) TransitionLocalState(newState telnet.TelOptState) (func() error, 
 	}
 
 	if newState == telnet.TelOptInactive && g.Terminal().Side() == telnet.SideServer {
+		g.parseLock.Lock()
+		defer g.parseLock.Unlock()
+
 		// Clear client support
 		for key := range g.remoteClientSupported {
 			delete(g.remoteClientSupported, key)
 			delete(g.remoteClientIntersection, key)
 		}
+
+		return nil, nil
 	}
 
 	return postFunc, err
@@ -359,6 +371,9 @@ func (g *GMCP) Subnegotiate(subnegotiation []byte) error {
 		rawJson = make([]byte, 0, jsonLen)
 		rawJson = append(rawJson, subnegotiation[consumed:]...)
 	}
+
+	g.parseLock.Lock()
+	defer g.parseLock.Unlock()
 
 	msg, err := g.createMessage(messageName, rawJson)
 	if err != nil {
