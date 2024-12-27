@@ -2,6 +2,7 @@ package gmcp
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"github.com/moodclient/telnet"
 )
@@ -94,7 +95,7 @@ func (m CharVitalsMessage) ID() string {
 
 func (m *CharVitalsMessage) StringValue() string {
 	val, _ := m.MapMessage.Value("string")
-	return val
+	return fmt.Sprintf("%+v", val)
 }
 
 type CharStatusVarsMessage struct {
