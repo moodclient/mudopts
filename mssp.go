@@ -146,9 +146,9 @@ func (m *MSSP) SubnegotiationString(subnegotiation []byte) (string, error) {
 		index++
 
 		token, consumed := m.readToken(subnegotiation[index:])
-		sb.WriteByte('"')
+		sb.WriteByte('\'')
 		sb.WriteString(token)
-		sb.WriteByte('"')
+		sb.WriteByte('\'')
 		sb.WriteByte(' ')
 		index += consumed
 
@@ -157,9 +157,9 @@ func (m *MSSP) SubnegotiationString(subnegotiation []byte) (string, error) {
 			index++
 
 			token, consumed := m.readToken(subnegotiation[index:])
-			sb.WriteByte('"')
+			sb.WriteByte('\'')
 			sb.WriteString(token)
-			sb.WriteByte('"')
+			sb.WriteByte('\'')
 			sb.WriteByte(' ')
 			index += consumed
 		}
