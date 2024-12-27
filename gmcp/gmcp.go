@@ -126,13 +126,13 @@ func (m *ValueMessage[T]) UnmarshalJSON(data []byte) error {
 
 type MapMessage struct {
 	ignoreKeys map[string]struct{}
-	values     map[string]string
+	values     map[string]any
 }
 
 func NewMapMessage(ignoreKeys ...string) MapMessage {
 	msg := MapMessage{
 		ignoreKeys: make(map[string]struct{}),
-		values:     make(map[string]string),
+		values:     make(map[string]any),
 	}
 	for _, key := range ignoreKeys {
 		msg.ignoreKeys[key] = struct{}{}
@@ -149,12 +149,12 @@ func (m *MapMessage) UnmarshalJSON(data []byte) error {
 	return json.Unmarshal(data, m.values)
 }
 
-func (m *MapMessage) Value(key string) (string, bool) {
+func (m *MapMessage) Value(key string) (any, bool) {
 	value, exists := m.values[key]
 	return value, exists
 }
 
-func (m *MapMessage) SetValue(key, value string) {
+func (m *MapMessage) SetValue(key string, value any) {
 	m.values[key] = value
 }
 
